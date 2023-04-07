@@ -23,31 +23,34 @@ class Complex_num:
         self.real = realPart
         self.imag = imagPart
 
-    
+
+    def add_nums (num1, num2):
+        return num1 + num2
+
+    def printing_number (num):
+        second_number = 5
+        print (f"Number is: {num}")
+        print (f"Sum is: {add_nums(num, second_number)}" )
+        
+
 num = Complex_num(3.0, 4.0)
+
+Complex_num.printing_number (6)
 
 print (num) # this prints off something weird: `<__main__.Complex_num object at 0x000002846BA0FE80>`
 print (num.real) # this prints off the real part of the previously defined variable `num`
 print (num.imag) # this prints the imaginary part. It seems that `self` will take on the name of new variable declarations. 
 
 num_2 = Complex_num(2.0, -1.20)
-print (num_2.real, num_2.imag)
 
 
-class Driver:
-    def __init__(self, implicitly_wait):
-        self.implicitly_wait = implicitly_wait
-
-    def get(self, url):
-        return f"{url}"
 
 
-# Create an instance of the Driver class i.e., the object `driver` is created as 
-# an object that belongs to the `Driver` class
-driver = Driver(900)
-
-url = "https://www.example.com"
-driver.get (url)
-
-
+class JobData:
+    def __init__ (self, Title, Company):
+        self.Title = Title
+        self.Company = Company
     
+    def get_Title (self, Data):
+
+job1 = JobData('Cashier', 'McDonalds')

@@ -4,58 +4,56 @@ import cloudscraper # Uses the cloudscraper library to bypass cloudflare restric
 from bs4 import BeautifulSoup 
 import csv
 
+# Parameters to adjust program behvaiour
+NUMBER_OF_JOBS = 60 # indeed lists out 15 jobs per page
+SEARCH_TERM = "mechanical engineer" 
+LOCATION = "vancouver"
+
+def get_HTML (SEARCH_TERM, LOCATION,page):
+    SEARCH_TERM = SEARCH_TERM.replace(" ", "+")
+    url = f'https://ca.indeed.com/jobs?q={SEARCH_TERM}&l={LOCATION}&start={page}'
+    print (url)
+    # Send a request through the get() method of cloudscrapper
+    response = scraper.get(url)
+    return response.content
+
+def parse_info(HTML):
+    # parses the HTML to find the specifc container which contains the bulk of the HTML information
+    soup = BeautifulSoup(HTML, 'html.parser')
+    ul_element = soup.find('ul', class_='jobsearch-ResultsList css-0')
+    li_elements = ul_element.find_all('li')
+
+    # searches through each list item - individual job information - for class info
+    for li in li_elements:
+        jobCard = li.find('table', class_='jobCard_mainContent big6_visualChanges')
+        if jobCard:
+            job_data = get_job_data(jobCard)
+            jobs.append(job_data)
+
+# main script which is used to obtain all the individual pieces of job information
+def get_job_data(jobCard):
+    job_title = jobCard.find('span', attrs={'title': True}).text.strip().replace('–', '-')
+    job_company = jobCard.find ('span', class_= 'companyName').text.strip()
+    job_location = jobCard.find('div', class_='companyLocation').text.strip()
+    job_salary = jobCard.find('div', class_='metadata salary')
+
+    print (f"{job_title}\n   Company: {job_company}\n   Location: {job_location}\n   Salary: {job_salary}")
+    return (job_title, job_company, job_location, job_salary)
+
+
 # Create a Cloudflare scraper instance
 scraper = cloudscraper.create_scraper()
 
-# Parameters to adjust program behvaiour
-NUMBER_OF_JOBS = 100
-SEARCH_TERM = "mechanical engineer" 
+# create a list to store the output
+jobs = []
 
-class job_data:
-    def __init__ (self, title, worktype, salary, location, company):
-        self.title = title
-        self.worktype = worktype
-        self.salary = salary
-        self.locatoin = location
-
-    def get_HTML (SEARCH_TERM, page):
-        SEARCH_TERM = SEARCH_TERM.replace(" ", "+")
-        url = f'https://ca.indeed.com/jobs?q={SEARCH_TERM}&start={page}'
-
-        # Send a request through the get() method of cloudscrapper
-        response = scraper.get(url)
-        html_content = response.content
-
-        # Parse the HTML content using Beautiful Soup. This setps soup to be a string of HTML text. 
-        return BeautifulSoup(html_content, 'lxml')
-    
-    def parse(HTML):
-        ul_element  = HTML.find('ul', class_='jobsearch-ResultsList css-0')
-        li_elements = ul_element.find_all('li')
-
-        # searches through each list item - individual job information - for class info
-        for li in li_elements:
-            jobCard = li.find ('table', class_= 'jobCard_mainContent big6_visualChanges')
-            if jobCard:
-                job_title = jobCard.find('h2', class_='jobTitle').text.strip()
-                job_company  = jobCard.find ('span', class_= 'companyName').text.strip()
-                job_location = jobCard.find('div', class_='companyLocation').text.strip()
-                # job_link_element = jobCard.find('a', href=True)
-                # if job_link_element:
-                #     job_link = job_link_element.get('href')
-                # else:
-                #     job_link = None
-                job_salary = jobCard.find('div', class_='metadata salary')
-
-                # job_worktype = jobCard.find('div', class_='jobHeader').find('span', class_='jobEmploymentType').text.strip()
-                print (f"{job_title}\n   Company: {job_company}\n   Location: {job_location}\n   Salary: {job_salary}")
-
-def write_CSV():
-    print ("")
-
-def write_Markdown():
-    print ("")
-
+# loops through job listings
 for page in range (0,NUMBER_OF_JOBS, 10):
-    HTML = job_data.get_HTML(SEARCH_TERM, page)
-    job_data.parse(HTML)
+    HTML = get_HTML(SEARCH_TERM, LOCATION, page)    
+    Main_job_info = parse_info(HTML)
+
+# writes the output to a CSV
+with open('jobs.csv', 'w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Job Title', 'Company Name', 'Location', 'Salary'])
+    writer.writerows(jobs)
