@@ -1,1 +1,2 @@
 2023-04-05 21:42:57.064 get_url.py[38] current_tab_url -> Find Control Timeout(10s): {Depth: 1, ControlType: EditControl}
+2023-04-06 13:03:57.362 get_url.py[10] <module> -> Find Control Timeout(10s): {ClassName: 'Chrome_Tab', ControlType: TabItemControl}

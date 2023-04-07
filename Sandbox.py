@@ -44,7 +44,7 @@ class Driver:
 
 # Create an instance of the Driver class i.e., the object `driver` is created as 
 # an object that belongs to the `Driver` class
-driver = Driver(10)
+driver = Driver(900)
 
 url = "https://www.example.com"
 driver.get (url)
