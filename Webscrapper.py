@@ -3,11 +3,14 @@
 import cloudscraper # Uses the cloudscraper library to bypass cloudflare restrictions and obtain page informaiton. 
 from bs4 import BeautifulSoup 
 import csv
+import datetime
+from datetime import date
 
 # Parameters to adjust program behvaiour
-NUMBER_OF_JOBS = 60 # indeed lists out 15 jobs per page
+NUMBER_OF_PAGES = 8 # indeed lists out 15 jobs per page
 SEARCH_TERM = "mechanical engineer" 
-LOCATION = "vancouver"
+LOCATION = "Vancouver"
+
 
 def get_HTML (SEARCH_TERM, LOCATION,page):
     SEARCH_TERM = SEARCH_TERM.replace(" ", "+")
@@ -30,15 +33,25 @@ def parse_info(HTML):
             job_data = get_job_data(jobCard)
             jobs.append(job_data)
 
+def get_URL (jobCard):
+    job_link = jobCard.find('a', attrs={'href': True})
+    relavtive = job_link['href']
+    return (f"indeed.com{relavtive}")
+
 # main script which is used to obtain all the individual pieces of job information
 def get_job_data(jobCard):
-    job_title = jobCard.find('span', attrs={'title': True}).text.strip().replace('–', '-')
+    job_title = jobCard.find('span', attrs={'title': True}).text.strip()
+    
+    if '–' in job_title:
+        job_title = job_title.replace('–', '-')
+
     job_company = jobCard.find ('span', class_= 'companyName').text.strip()
     job_location = jobCard.find('div', class_='companyLocation').text.strip()
     job_salary = jobCard.find('div', class_='metadata salary')
-
-    print (f"{job_title}\n   Company: {job_company}\n   Location: {job_location}\n   Salary: {job_salary}")
-    return (job_title, job_company, job_location, job_salary)
+    job_URL = get_URL(jobCard)
+    
+    # print (f"{job_title}\n   Company: {job_company}\n   Location: {job_location}\n   Salary: {job_salary}")
+    return (job_title, job_company, job_location, job_salary, job_URL)
 
 
 # Create a Cloudflare scraper instance
@@ -48,12 +61,20 @@ scraper = cloudscraper.create_scraper()
 jobs = []
 
 # loops through job listings
-for page in range (0,NUMBER_OF_JOBS, 10):
-    HTML = get_HTML(SEARCH_TERM, LOCATION, page)    
+for page in range (0,NUMBER_OF_PAGES):
+    HTML = get_HTML(SEARCH_TERM, LOCATION, page*10)    
     Main_job_info = parse_info(HTML)
 
 # writes the output to a CSV
-with open('jobs.csv', 'w', newline='', encoding='utf-8') as file:
+current_date = date.today()
+CSV_title = f"{current_date}, {SEARCH_TERM}, {LOCATION} - jobs.csv"
+
+with open(CSV_title, 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(['Job Title', 'Company Name', 'Location', 'Salary'])
+    writer.writerow(['Job Title', 'Company Name', 'Location', 'Salary', 'Link'])
     writer.writerows(jobs)
+
+
+
+
+
