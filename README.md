@@ -1,6 +1,6 @@
 # 2023-Bulk-link-save
 
-A webscrapper that compiles the job info of multiple pages on indeed listings.
+A webscrapper that compiles the job info of multiple pages on indeed listings in bulk. 
 
 
 
